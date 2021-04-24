@@ -30,7 +30,11 @@ defmodule PluggyElixir.Config do
   def get_client_secret, do: get_pluggy_elixir_config(:client_secret)
 
   @doc false
-  def get_host, do: get_pluggy_elixir_config(:host, @default_host)
+  def get_host_uri do
+    ~r"(?<scheme>http[s]?)?(:[\/]{2})?(?<host>[\w\.]+)(:?(?<port>\d+))?(\/(?<path>.*))?"
+    |> Regex.named_captures(get_pluggy_elixir_config(:host, @default_host))
+    |> to_uri()
+  end
 
   @doc false
   def non_expiring_api_key,
@@ -39,6 +43,28 @@ defmodule PluggyElixir.Config do
   @doc false
   def sandbox,
     do: if(get_pluggy_elixir_config(:sandbox, false) == true, do: true, else: false)
+
+  @doc false
+  def get_http_adapter_config, do: [adapter: Tesla.Adapter.Hackney]
+
+  defp to_uri(captures) do
+    %URI{
+      scheme: get_captured(captures, "scheme", "https"),
+      host: get_captured(captures, "host"),
+      port: port_to_integer(get_captured(captures, "port")),
+      path: get_captured(captures, "path")
+    }
+  end
+
+  defp get_captured(captures, key, default \\ nil) do
+    case Map.get(captures, key, default) do
+      "" -> default
+      value -> value
+    end
+  end
+
+  defp port_to_integer(port) when is_binary(port), do: String.to_integer(port)
+  defp port_to_integer(port), do: port
 
   defp get_pluggy_elixir_config(key, default_value \\ :required, custom_message \\ nil) do
     case Application.get_env(:pluggy_elixir, key, default_value) do

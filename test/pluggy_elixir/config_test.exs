@@ -39,15 +39,33 @@ defmodule PluggyElixir.ConfigTest do
     end
   end
 
-  describe "get_host/0" do
-    test "return configured value" do
-      assert Config.get_host() == "localhost:1234"
+  describe "get_host_uri/0" do
+    test "return a URI struct by parsing configured value" do
+      assert Config.get_host_uri() == %URI{
+               scheme: "https",
+               host: "localhost",
+               port: 1234
+             }
     end
 
-    test "return default value false when not configured" do
+    test "return default value when not configured" do
       Application.delete_env(:pluggy_elixir, :host)
 
-      assert Config.get_host() == "api.pluggy.ai"
+      assert Config.get_host_uri() == %URI{
+               scheme: "https",
+               host: "api.pluggy.ai"
+             }
+    end
+
+    test "parse full url" do
+      Application.put_env(:pluggy_elixir, :host, "http://host.com:5000/api")
+
+      assert Config.get_host_uri() == %URI{
+               scheme: "http",
+               host: "host.com",
+               port: 5000,
+               path: "api"
+             }
     end
   end
 
