@@ -10,8 +10,7 @@
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `pluggy_elixir` to your list of dependencies in `mix.exs`:
+Add `pluggy_elixir` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -20,6 +19,22 @@ def deps do
   ]
 end
 ```
+
+Update deps
+
+```sh
+mix deps.get
+```
+
+Add the credentials to your config file (ex: `config.exs`)
+
+```elixir
+config :pluggy_elixir,
+  client_id: "your-app-client-id",
+  client_secret: "your-app-client-secret",
+```
+
+See more about configurations in `PluggyElixir.Config` docs.
 
 ## Contributing
 

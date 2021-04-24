@@ -58,8 +58,11 @@ defmodule PluggyElixir.MixProject do
     [
       source_ref: "v#{@version}",
       main: "readme",
+      extra_section: "Guides",
       extras: [
-        "README.md": [title: "Get starting"]
+        "README.md": [title: "Get starting"],
+        "CONTRIBUTING.md": [title: "Contributing"],
+        LICENSE: [title: "License"]
       ],
       groups_for_modules: []
     ]
