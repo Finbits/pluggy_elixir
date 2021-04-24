@@ -1,5 +1,11 @@
 # PluggyElixir
 
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/brainnco/pluggy_elixir/CI?style=flat-square)](https://github.com/brainnco/pluggy_elixir/actions?query=workflow%3ACI)
+[![Hex.pm](https://img.shields.io/hexpm/v/pluggy_elixir?style=flat-square)](https://hex.pm/packages/pluggy_elixir)
+[![Hex.pm](https://img.shields.io/hexpm/l/pluggy_elixir?style=flat-square)](https://hex.pm/packages/pluggy_elixir)
+[![Hex.pm](https://img.shields.io/hexpm/dt/pluggy_elixir?style=flat-square)](https://hex.pm/packages/pluggy_elixir)
+[![codecov](https://img.shields.io/codecov/c/github/brainnco/pluggy_elixir?style=flat-square)](https://codecov.io/gh/brainnco/pluggy_elixir)
+
 **TODO: Add description**
 
 ## Installation
@@ -10,12 +16,15 @@ by adding `pluggy_elixir` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:pluggy_elixir, "~> 0.1.0"}
+    {:pluggy_elixir, "~> 0.0.1"}
   ]
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/pluggy_elixir](https://hexdocs.pm/pluggy_elixir).
+## Contributing
 
+[Contributing Guide](CONTRIBUTING.md)
+
+## License
+
+[Apache License, Version 2.0](LICENSE) © [brainn.co](https://github.com/brainnco)
