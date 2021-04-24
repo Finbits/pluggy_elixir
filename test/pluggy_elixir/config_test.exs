@@ -39,6 +39,18 @@ defmodule PluggyElixir.ConfigTest do
     end
   end
 
+  describe "get_host/0" do
+    test "return configured value" do
+      assert Config.get_host() == "localhost:1234"
+    end
+
+    test "return default value false when not configured" do
+      Application.delete_env(:pluggy_elixir, :host)
+
+      assert Config.get_host() == "api.pluggy.ai"
+    end
+  end
+
   describe "non_expiring_api_key/0" do
     test "return configured value" do
       assert Config.non_expiring_api_key() == true
@@ -54,6 +66,24 @@ defmodule PluggyElixir.ConfigTest do
       Application.put_env(:pluggy_elixir, :non_expiring_api_key, "yes")
 
       assert Config.non_expiring_api_key() == false
+    end
+  end
+
+  describe "sandbox/0" do
+    test "return configured value" do
+      assert Config.sandbox() == true
+    end
+
+    test "return default value false when not configured" do
+      Application.delete_env(:pluggy_elixir, :sandbox)
+
+      assert Config.sandbox() == false
+    end
+
+    test "return default value false when configured value is invalid" do
+      Application.put_env(:pluggy_elixir, :sandbox, "yes")
+
+      assert Config.sandbox() == false
     end
   end
 end
