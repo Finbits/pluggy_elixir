@@ -8,17 +8,24 @@ defmodule PluggyElixir.HttpAdapter.Tesla do
   @behaviour PluggyElixir.HttpAdapter
 
   @impl true
-  def post(url, body, query \\ []) do
+  def post(url, body, query \\ [], headers \\ []) do
     build_client()
-    |> Tesla.post(url, body, query: build_query(query))
+    |> Tesla.post(url, body, build_options(query, headers))
     |> format_response()
   end
 
   @impl true
-  def get(url, query \\ []) do
+  def get(url, query \\ [], headers \\ []) do
     build_client()
-    |> Tesla.get(url, query: build_query(query))
+    |> Tesla.get(url, build_options(query, headers))
     |> format_response()
+  end
+
+  defp build_options(query, headers) do
+    [
+      query: build_query(query),
+      headers: headers
+    ]
   end
 
   defp build_query(query),

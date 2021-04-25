@@ -14,8 +14,8 @@ defmodule PluggyElixir.HttpAdapter do
   @type adapter_response :: {:ok, Response.t()} | {:error, binary()}
 
   @doc "Perform a HTTP request with GET method"
-  @callback get(url, query) :: adapter_response()
+  @callback get(url, query, Response.headers()) :: adapter_response()
 
   @doc "Perform a HTTP request with POST method"
-  @callback post(url, Response.body(), query) :: adapter_response()
+  @callback post(url, Response.body(), query, Response.headers()) :: adapter_response()
 end
