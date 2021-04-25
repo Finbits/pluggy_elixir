@@ -42,7 +42,7 @@ defmodule PluggyElixir.ConfigTest do
   describe "get_host_uri/0" do
     test "return a URI struct by parsing configured value" do
       assert Config.get_host_uri() == %URI{
-               scheme: "https",
+               scheme: "http",
                host: "localhost",
                port: 1234
              }

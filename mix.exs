@@ -40,7 +40,12 @@ defmodule PluggyElixir.MixProject do
 
   defp deps do
     [
+      {:tesla, "~> 1.4.0"},
+
       # Dev/Test dependencies
+      {:hackney, "~> 1.17.0", only: [:test]},
+      {:bypass, "~> 2.1.0", only: [:test]},
+      {:json, "~> 1.4", only: [:test]},
       {:credo, "~> 1.5", only: [:dev, :test]},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
       {:excoveralls, "~> 0.14", only: :test}
@@ -64,7 +69,14 @@ defmodule PluggyElixir.MixProject do
         "CONTRIBUTING.md": [title: "Contributing"],
         LICENSE: [title: "License"]
       ],
-      groups_for_modules: []
+      groups_for_modules: [
+        Behaviours: [
+          PluggyElixir.HttpAdapter
+        ],
+        "HTTP Adapters": [
+          PluggyElixir.HttpAdapter.Tesla
+        ]
+      ]
     ]
   end
 end
