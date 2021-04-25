@@ -75,6 +75,9 @@ defmodule PluggyElixir.MixProject do
         ],
         "HTTP Adapters": [
           PluggyElixir.HttpAdapter.Tesla
+        ],
+        Errors: [
+          ~r/PluggyElixir\.Error\..*/
         ]
       ]
     ]

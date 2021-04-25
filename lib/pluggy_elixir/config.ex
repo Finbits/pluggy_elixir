@@ -47,6 +47,9 @@ defmodule PluggyElixir.Config do
   @doc false
   def get_http_adapter_config, do: [adapter: Tesla.Adapter.Hackney]
 
+  @doc false
+  def get_http_adapter, do: PluggyElixir.HttpAdapter.Tesla
+
   defp to_uri(captures) do
     %URI{
       scheme: get_captured(captures, "scheme", "https"),
