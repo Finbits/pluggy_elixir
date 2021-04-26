@@ -155,4 +155,20 @@ defmodule PluggyElixir.HttpClientTest do
       assert {:ok, %Response{status: 200, body: %{"message" => "ok"}}} = response
     end
   end
+
+  describe "[ error handle ]" do
+    test "parse a forbidden error", %{bypass: bypass} do
+      create_and_save_api_key()
+
+      url = "/transactions"
+
+      bypass_expect(bypass, "GET", url, fn conn ->
+        Conn.resp(conn, 403, ~s<{"message":"Forbidden"}>)
+      end)
+
+      response = HttpClient.get(url)
+
+      assert response == {:error, %Error{message: "Forbidden", code: 403}}
+    end
+  end
 end

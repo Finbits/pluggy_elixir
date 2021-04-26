@@ -4,6 +4,7 @@ defmodule PluggyElixir.HttpClient do
   alias PluggyElixir.Auth.Guard
   alias PluggyElixir.{Auth, Config, HttpAdapter}
   alias PluggyElixir.HttpAdapter.Response
+  alias PluggyElixir.HttpClient.Error
 
   @expired_msg "Missing or invalid authorization token"
 
@@ -20,8 +21,9 @@ defmodule PluggyElixir.HttpClient do
   defp http_request(request) do
     with %Auth{} = auth <- retrieve_auth(),
          authenticated <- authenticate(auth, request),
-         {:performed, response} <- perform_request(authenticated) do
-      return_or_retry(response, request)
+         {:performed, response} <- perform_request(authenticated),
+         result <- return_or_retry(response, request) do
+      handle_result(result)
     end
   end
 
@@ -62,6 +64,15 @@ defmodule PluggyElixir.HttpClient do
         error
     end
   end
+
+  defp handle_result({:ok, %Response{status: status}} = success)
+       when status >= 200 and status < 300,
+       do: success
+
+  defp handle_result({:ok, %Response{} = response}),
+    do: {:error, Error.parse(response)}
+
+  defp handle_result({:error, _reason} = error), do: error
 
   defp http_adapter, do: Config.get_http_adapter()
 end
