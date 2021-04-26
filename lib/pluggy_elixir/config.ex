@@ -24,25 +24,25 @@ defmodule PluggyElixir.Config do
   @default_host "api.pluggy.ai"
 
   @doc false
-  def get_client_id, do: get_pluggy_elixir_config(:client_id)
+  def get_client_id, do: get_config(:client_id)
 
   @doc false
-  def get_client_secret, do: get_pluggy_elixir_config(:client_secret)
+  def get_client_secret, do: get_config(:client_secret)
 
   @doc false
   def get_host_uri do
     ~r"(?<scheme>http[s]?)?(:[\/]{2})?(?<host>[\w\.]+)(:?(?<port>\d+))?(\/(?<path>.*))?"
-    |> Regex.named_captures(get_pluggy_elixir_config(:host, @default_host))
+    |> Regex.named_captures(get_config(:host, @default_host))
     |> to_uri()
   end
 
   @doc false
   def non_expiring_api_key,
-    do: if(get_pluggy_elixir_config(:non_expiring_api_key, false) == true, do: true, else: false)
+    do: if(get_config(:non_expiring_api_key, false) == true, do: true, else: false)
 
   @doc false
   def sandbox,
-    do: if(get_pluggy_elixir_config(:sandbox, false) == true, do: true, else: false)
+    do: if(get_config(:sandbox, false) == true, do: true, else: false)
 
   @doc false
   def get_http_adapter_config, do: [adapter: Tesla.Adapter.Hackney]
@@ -69,7 +69,7 @@ defmodule PluggyElixir.Config do
   defp port_to_integer(port) when is_binary(port), do: String.to_integer(port)
   defp port_to_integer(port), do: port
 
-  defp get_pluggy_elixir_config(key, default_value \\ :required, custom_message \\ nil) do
+  defp get_config(key, default_value \\ :required, custom_message \\ nil) do
     case Application.get_env(:pluggy_elixir, key, default_value) do
       :required -> config_error(key, custom_message)
       value -> config_success(value, default_value)
