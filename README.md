@@ -8,7 +8,21 @@
 
 Welcome to Pluggy Elixir, an API client written in Elixir to access the Open Banking services provided by [Pluggy](http://pluggy.ai)
 
+## Installation
+
+If [available in Hex](https://hex.pm/docs/publish), the package can be installed
+by adding `pluggy_elixir` to your list of dependencies in `mix.exs`:
+
+```elixir
+def deps do
+  [
+    {:pluggy_elixir, "~> 0.0.1"}
+  ]
+end
+```
+
 ## Use cases
+
 ### Register
 <table>
 <tr>
@@ -36,7 +50,6 @@ Welcome to Pluggy Elixir, an API client written in Elixir to access the Open Ban
 </td>
 </tr>
 </table>
-
 
 ### Checking account
 <table>
@@ -128,11 +141,11 @@ Welcome to Pluggy Elixir, an API client written in Elixir to access the Open Ban
 ```
 </td>
 <td>
-<li>Portifolio Consolidation</li>
+<li>Portfolio Consolidation</li>
 <li>Financial Profile</li>
 <li>Transaction monitoring</li>
 <li>Investment capacity analysis</li>
-<li>Portolio risk analysis</li>
+<li>Portfolio risk analysis</li>
 <li>Investment automation</li>
 </td>
 </tr>
@@ -168,21 +181,9 @@ Welcome to Pluggy Elixir, an API client written in Elixir to access the Open Ban
 </tr>
 </table>
 
-## Installation
+## API spec
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `pluggy_elixir` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:pluggy_elixir, "~> 0.0.1"}
-  ]
-end
-```
-
-## Documentation
-For most up-to-date and accurate documentation, please see the [API Reference](https://docs.pluggy.ai) page.
+For most up-to-date and accurate documentation, please see the [API Spec](https://docs.pluggy.ai) page.
 
 ## Contributing
 
