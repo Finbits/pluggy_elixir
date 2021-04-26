@@ -1,4 +1,8 @@
 defmodule PluggyElixir.Webhook do
+  @moduledoc """
+  Handle webhooks actions.
+  """
+
   alias PluggyElixir.HttpClient
 
   defstruct [:created_at, :event, :id, :updated_at, :url]
@@ -13,7 +17,26 @@ defmodule PluggyElixir.Webhook do
 
   @webhooks_path "/webhooks"
 
+  @doc """
+  List all created webhooks.
+
+  ### Examples
+
+      iex> Webhook.all()
+      {:ok,
+       [
+         %Webhook{
+           created_at: ~N[2021-04-26 17:41:12.093],
+           event: "item/updated",
+           id: "3f1f222b-6efa-4736-8ded-8b14646f79bc",
+           updated_at: ~N[2021-04-26 17:41:12.093],
+           url: "https://yourapp.com.br/webhook"
+         }
+       ]}
+  """
+
   @spec all :: {:ok, [t()]} | {:error, PluggyElixir.Error.t()}
+
   def all do
     @webhooks_path
     |> HttpClient.get()
