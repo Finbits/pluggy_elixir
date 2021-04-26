@@ -63,13 +63,15 @@ end
 ```elixir
 {
   balances,
-  transactions:{
-    date,
-    values,
-    description,
-    type,
-    category
-  }
+  transactions: [
+    {
+      date,
+      values,
+      description,
+      type,
+      category
+    }
+  ]
 }
 ```
 </td>
