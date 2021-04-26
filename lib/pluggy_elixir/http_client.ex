@@ -58,7 +58,7 @@ defmodule PluggyElixir.HttpClient do
         auth
 
       {:error, reason} = error ->
-        Guard.set_auth(reason)
+        Guard.set_auth_error(reason)
         error
     end
   end

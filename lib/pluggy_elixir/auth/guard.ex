@@ -18,6 +18,8 @@ defmodule PluggyElixir.Auth.Guard do
     |> Map.get(registry_key(@env))
   end
 
+  defdelegate set_auth_error(error), to: __MODULE__, as: :set_auth
+
   @spec set_auth(Auth.t() | Error.t()) :: :ok
   def set_auth(auth) do
     key = registry_key(@env)
