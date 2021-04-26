@@ -44,7 +44,7 @@ defmodule PluggyElixir.ConfigTest do
       assert Config.get_host_uri() == %URI{
                scheme: "http",
                host: "localhost",
-               port: 1234
+               port: 54321
              }
     end
 
