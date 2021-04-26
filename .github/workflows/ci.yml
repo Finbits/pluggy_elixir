@@ -77,12 +77,12 @@ jobs:
           MIX_ENV: test
       - name: Run codecov script
         run: bash <(curl -s https://codecov.io/bash)
-
+  # Check version is disabled
   mix_check_version:
     name: Check version (Elixir 1.11.3 OTP 23.3)
     runs-on: ubuntu-16.04
     needs: [mix_format, mix_credo, mix_test]
-    if: github.ref != 'refs/heads/main' && github.event_name == 'pull_request' && github.base_ref == 'main'
+    if: false && github.ref != 'refs/heads/main' && github.event_name == 'pull_request' && github.base_ref == 'main'
     steps:
       - uses: actions/checkout@v1
       - uses: erlef/setup-elixir@v1

@@ -13,7 +13,7 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
     :ok
   end
 
-  describe "post/3" do
+  describe "post/4" do
     test "perform a post request and return status, body and headers", %{bypass: bypass} do
       url = "/auth"
       body = %{"key" => "value"}
@@ -50,6 +50,19 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       end)
 
       assert {:ok, %Response{}} = Tesla.post(url, %{}, query)
+    end
+
+    test "sending custom headers", %{bypass: bypass} do
+      url = "/auth"
+      headers = [{"custom-header", "custom-value"}]
+
+      bypass_expect(bypass, "POST", url, fn conn ->
+        assert Enum.any?(headers, fn header -> [header] == headers end) == true
+
+        Conn.resp(conn, 200, ~s<{"message": "ok"}>)
+      end)
+
+      assert {:ok, %Response{}} = Tesla.post(url, %{}, [], headers)
     end
 
     test "send query sandbox as true when sandbox is configured", %{bypass: bypass} do
@@ -127,7 +140,7 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
     end
   end
 
-  describe "get/2" do
+  describe "get/3" do
     test "perform a get request and return status, body and headers", %{bypass: bypass} do
       url = "/auth"
 
@@ -161,6 +174,19 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       end)
 
       assert {:ok, %Response{}} = Tesla.get(url, query)
+    end
+
+    test "sending custom headers", %{bypass: bypass} do
+      url = "/auth"
+      headers = [{"custom-headers", "custom-value"}]
+
+      bypass_expect(bypass, "GET", url, fn conn ->
+        assert Enum.any?(headers, fn header -> [header] == headers end) == true
+
+        Conn.resp(conn, 200, ~s<{"message": "ok"}>)
+      end)
+
+      assert {:ok, %Response{}} = Tesla.get(url, [], headers)
     end
 
     test "send query sandbox as true when sandbox is configured", %{bypass: bypass} do

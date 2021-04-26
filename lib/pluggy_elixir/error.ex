@@ -6,11 +6,13 @@ defmodule PluggyElixir.Error do
   alias PluggyElixir.Error.Unauthorized
   alias PluggyElixir.HttpAdapter.Response
 
+  @type error :: Unauthorized.t()
+
   @doc """
   Return an Error struct by given response
   """
 
-  @spec parse(Response.t()) :: Unauthorized.t()
+  @spec parse(Response.t()) :: error()
   def parse(%Response{} = response) do
     case response do
       %{status: 401, body: %{"message" => message, "code" => 401}} ->

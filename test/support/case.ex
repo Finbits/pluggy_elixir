@@ -4,49 +4,14 @@ defmodule PluggyElixir.Case do
   using do
     quote do
       alias Plug.Conn
+      import PluggyElixir.BypassExpect
 
-      def bypass_expect(bypass, method, url, mock_func) do
-        Bypass.expect(bypass, method, url, fn conn ->
-          conn
-          |> bypass_expect_validate_content_type()
-          |> Conn.read_body()
-          |> bypass_expect_json_decode()
-          |> Conn.put_resp_header("content-type", "application/json")
-          |> mock_func.()
-        end)
+      def create_and_save_api_key do
+        auth = %PluggyElixir.Auth{api_key: "generated_api_key_#{:rand.uniform()}"}
+        PluggyElixir.Auth.Guard.set_auth(auth)
+
+        auth.api_key
       end
-
-      defp bypass_expect_validate_content_type(conn) do
-        conn
-        |> Conn.get_req_header("content-type")
-        |> case do
-          ["application/json" <> _tail] -> conn
-          _other -> bypass_raise("Pluggy API requires content-type: application/json header")
-        end
-      end
-
-      defp bypass_expect_json_decode({:ok, body, conn}) do
-        body
-        |> case do
-          "" -> {:ok, %{}}
-          json -> Jason.decode(json)
-        end
-        |> bypass_expect_add_body(conn)
-      end
-
-      defp bypass_expect_add_body({:ok, body}, conn) when is_map(body) do
-        %{conn | body_params: body, params: Map.merge(conn.params, body)}
-      end
-
-      defp bypass_expect_add_body({:error, reason}, _conn) do
-        bypass_raise(
-          "Pluggy API just accept body with JSON format. The Jason.decode/1 failed with #{
-            inspect(reason)
-          }"
-        )
-      end
-
-      defp bypass_raise(msg), do: raise("\n\n\n>>>>>> Bypass error:\n\n#{msg}\n\n<<<<<<\n\n\n")
     end
   end
 
