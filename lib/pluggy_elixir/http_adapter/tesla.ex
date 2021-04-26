@@ -27,7 +27,7 @@ defmodule PluggyElixir.HttpAdapter.Tesla do
   defp build_client do
     Tesla.client(
       [
-        {Tesla.Middleware.BaseUrl, host()},
+        {Tesla.Middleware.BaseUrl, host_uri()},
         {Tesla.Middleware.Headers, [{"content-type", "application/json"}]},
         Tesla.Middleware.JSON
       ],
@@ -46,5 +46,5 @@ defmodule PluggyElixir.HttpAdapter.Tesla do
 
   defp format_response({:error, reason}), do: {:error, inspect(reason)}
 
-  defp host, do: to_string(Config.get_host_uri())
+  defp host_uri, do: to_string(Config.get_host_uri())
 end
