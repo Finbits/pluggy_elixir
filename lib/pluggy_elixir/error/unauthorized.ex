@@ -3,9 +3,9 @@ defmodule PluggyElixir.Error.Unauthorized do
   Error for invalid credentials.
   """
 
+  defstruct [:message]
+
   @type t :: %__MODULE__{
           message: binary()
         }
-
-  defstruct [:message]
 end

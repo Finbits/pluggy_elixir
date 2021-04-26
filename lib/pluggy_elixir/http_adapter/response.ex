@@ -3,6 +3,8 @@ defmodule PluggyElixir.HttpAdapter.Response do
   This module defines a `PluggyElixir.HttpAdapter.Response.t/0` struct that stores http responses.
   """
 
+  defstruct [:body, :headers, :status]
+
   @type body :: any()
   @type headers :: [{binary(), binary()}]
   @type status :: integer() | nil
@@ -12,6 +14,4 @@ defmodule PluggyElixir.HttpAdapter.Response do
           headers: headers(),
           status: status()
         }
-
-  defstruct [:body, :headers, :status]
 end

@@ -66,7 +66,7 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       assert {:ok, %Response{}} = Tesla.post(url, %{})
     end
 
-    test "dont send query sandbox when sandbox is configured to false", %{bypass: bypass} do
+    test "don't send query sandbox when sandbox is configured to false", %{bypass: bypass} do
       Application.put_env(:pluggy_elixir, :sandbox, false)
 
       url = "/auth"
@@ -100,7 +100,7 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       assert {:ok, %Response{status: 500, body: %{"error" => "fail"}}} = Tesla.post(url, %{})
     end
 
-    test "return error when response isnt a valid json", %{bypass: bypass} do
+    test "return error when response isn't a valid json", %{bypass: bypass} do
       url = "/auth"
 
       bypass_expect(bypass, "POST", url, fn conn ->
@@ -118,7 +118,7 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       assert Tesla.post(url, %{}) == {:error, "econnrefused"}
     end
 
-    test "return error when cant resolve hostname" do
+    test "return error when can't resolve hostname" do
       Application.put_env(:pluggy_elixir, :host, "invalid.host.ex")
 
       url = "/auth"
@@ -177,7 +177,7 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       assert {:ok, %Response{}} = Tesla.get(url)
     end
 
-    test "dont send query sandbox when sandbox is configured to false", %{bypass: bypass} do
+    test "don't send query sandbox when sandbox is configured to false", %{bypass: bypass} do
       Application.put_env(:pluggy_elixir, :sandbox, false)
 
       url = "/auth"
@@ -211,7 +211,7 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       assert {:ok, %Response{status: 500, body: %{"error" => "fail"}}} = Tesla.get(url)
     end
 
-    test "return error when response isnt a valid json", %{bypass: bypass} do
+    test "return error when response isn't a valid json", %{bypass: bypass} do
       url = "/auth"
 
       bypass_expect(bypass, "GET", url, fn conn ->
@@ -229,7 +229,7 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       assert Tesla.get(url) == {:error, "econnrefused"}
     end
 
-    test "return error when cant resolve hostname" do
+    test "return error when can't resolve hostname" do
       Application.put_env(:pluggy_elixir, :host, "invalid.host.ex")
 
       url = "/auth"

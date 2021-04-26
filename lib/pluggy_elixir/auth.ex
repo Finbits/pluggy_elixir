@@ -6,21 +6,21 @@ defmodule PluggyElixir.Auth do
   alias PluggyElixir.Config
   alias PluggyElixir.Error
 
-  @type t :: %__MODULE__{
-          api_key: binary()
-        }
+  @auth_path "/auth"
 
   defstruct [:api_key]
 
-  @auth_path "/auth"
-
-  @spec create_api_key :: {:ok, t()} | {:error, binary()}
+  @type t :: %__MODULE__{
+          api_key: binary()
+        }
 
   @doc """
   Create an API Key using configured client_id and client_secret.
 
   The API Key is used to authenticate all requests to Pluggy API.
   """
+
+  @spec create_api_key :: {:ok, t()} | {:error, binary()}
   def create_api_key do
     build_api_key_params()
     |> perform_request()
