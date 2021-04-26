@@ -32,7 +32,7 @@ end
 <tr>
 <td>
 
-```graphql
+```
 {
   full_name,
   tax_id,
@@ -60,7 +60,7 @@ end
 <tr>
 <td>
 
-```json
+```
 {
   balances,
   transactions: [
@@ -95,7 +95,7 @@ end
 <tr>
 <td>
 
-```elixir
+```
 {
   limits,
   minimum_payment,
@@ -127,7 +127,7 @@ end
 <tr>
 <td>
 
-```elixir
+```
 {
   assets,
   code,
