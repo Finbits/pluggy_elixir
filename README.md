@@ -6,7 +6,7 @@
 [![Hex.pm](https://img.shields.io/hexpm/dt/pluggy_elixir?style=flat-square)](https://hex.pm/packages/pluggy_elixir)
 [![codecov](https://img.shields.io/codecov/c/github/brainnco/pluggy_elixir?style=flat-square)](https://codecov.io/gh/brainnco/pluggy_elixir)
 
-Welcome to Pluggy Elixir, an API client written in Elixir to access the Open Banking services provided by [Pluggy](http://pluggy.ai)
+Welcome to Pluggy Elixir, an API client written in Elixir to access the Open Finance services provided by [Pluggy](http://pluggy.ai)
 
 ## Installation
 
@@ -32,7 +32,7 @@ end
 <tr>
 <td>
 
-```elixir
+```graphql
 {
   full_name,
   tax_id,
@@ -60,7 +60,7 @@ end
 <tr>
 <td>
 
-```elixir
+```json
 {
   balances,
   transactions: [
