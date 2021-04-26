@@ -1,6 +1,7 @@
 defmodule PluggyElixir.WebhookTest do
   use PluggyElixir.Case, async: true
 
+  alias PluggyElixir.HttpClient.Error
   alias PluggyElixir.Webhook
 
   describe "all/0" do
@@ -42,9 +43,12 @@ defmodule PluggyElixir.WebhookTest do
 
     test "when has error to get webhook list, returns that error", %{bypass: bypass} do
       create_and_save_api_key()
-      Bypass.down(bypass)
 
-      assert Webhook.all() == {:error, "econnrefused"}
+      bypass_expect(bypass, "GET", "/webhooks", fn conn ->
+        Conn.resp(conn, 500, ~s<{"message":"Internal Server Error"}>)
+      end)
+
+      assert Webhook.all() == {:error, %Error{message: "Internal Server Error", code: 500}}
     end
   end
 end

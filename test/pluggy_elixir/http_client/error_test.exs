@@ -1,8 +1,8 @@
 defmodule PluggyElixir.HttpClient.ErrorTest do
   use ExUnit.Case, async: true
 
-  alias PluggyElixir.HttpClient.Error
   alias PluggyElixir.HttpAdapter.Response
+  alias PluggyElixir.HttpClient.Error
 
   describe "parse/1" do
     test "parse an unauthorized error" do
