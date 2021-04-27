@@ -176,4 +176,134 @@ defmodule PluggyElixir.WebhookTest do
              }
     end
   end
+
+  describe "update/2" do
+    test "update a webook", %{bypass: bypass} do
+      create_and_save_api_key()
+
+      id = "webhook_id"
+
+      params = %{
+        id: id,
+        event: "all",
+        url: "https://finbits.com.br/updated_webhook"
+      }
+
+      config_overrides = [host: "http://localhost:#{bypass.port}"]
+
+      bypass_expect(bypass, "PATCH", "/webhooks/:id", fn %{body_params: body} = conn ->
+        assert conn.params["id"] == id
+
+        Conn.resp(
+          conn,
+          200,
+          ~s<{"id": "#{id}", "event": "#{body["event"]}", "url": "#{body["url"]}", "createdAt": "2020-06-24T21:29:40.300Z", "updatedAt": "2020-06-24T21:29:40.300Z"}>
+        )
+      end)
+
+      assert {:ok, result} = Webhook.update(params, config_overrides)
+
+      assert result == %Webhook{
+               created_at: ~N[2020-06-24 21:29:40.300],
+               event: params.event,
+               id: id,
+               updated_at: ~N[2020-06-24 21:29:40.300],
+               url: params.url
+             }
+    end
+
+    test "when using an invalid event, returns a bad request error", %{bypass: bypass} do
+      create_and_save_api_key()
+
+      invalid_params = %{
+        id: "someid",
+        event: "invalid_event",
+        url: "https://finbits.com.br/webhook"
+      }
+
+      config_overrides = [host: "http://localhost:#{bypass.port}"]
+
+      bypass_expect(bypass, "PATCH", "/webhooks/:id", fn conn ->
+        Conn.resp(
+          conn,
+          400,
+          ~s<{"message": "Invalid event type for webhook", "code": 400}>
+        )
+      end)
+
+      assert {:error, result} = Webhook.update(invalid_params, config_overrides)
+
+      assert result == %Error{
+               code: 400,
+               details: nil,
+               message: "Invalid event type for webhook"
+             }
+    end
+
+    test "when using an invalid URL, returns a bad request error", %{bypass: bypass} do
+      create_and_save_api_key()
+
+      invalid_params = %{
+        id: "someid",
+        event: "all",
+        url: "invalid_url"
+      }
+
+      config_overrides = [host: "http://localhost:#{bypass.port}"]
+
+      bypass_expect(bypass, "PATCH", "/webhooks/:id", fn conn ->
+        Conn.resp(
+          conn,
+          400,
+          ~s<{"message": "Webhook url is not valid", "code": 400}>
+        )
+      end)
+
+      assert {:error, result} = Webhook.update(invalid_params, config_overrides)
+
+      assert result == %Error{
+               code: 400,
+               details: nil,
+               message: "Webhook url is not valid"
+             }
+    end
+
+    test "when using missing params, returns a validation error" do
+      invalid_params = %{}
+
+      assert Webhook.update(invalid_params) == {:error, ":id and :event are required"}
+    end
+
+    test "when has error to update webhook, returns that error", %{bypass: bypass} do
+      create_and_save_api_key()
+
+      id = "someid"
+
+      params = %{
+        id: id,
+        event: "all",
+        url: "https://finbits.com.br/webhook"
+      }
+
+      config_overrides = [host: "http://localhost:#{bypass.port}"]
+
+      bypass_expect(bypass, "PATCH", "/webhooks/:id", fn conn ->
+        assert conn.params["id"] == id
+
+        Conn.resp(
+          conn,
+          500,
+          ~s<{"message":"Internal Server Error"}>
+        )
+      end)
+
+      assert {:error, result} = Webhook.update(params, config_overrides)
+
+      assert result == %Error{
+               code: 500,
+               details: nil,
+               message: "Internal Server Error"
+             }
+    end
+  end
 end

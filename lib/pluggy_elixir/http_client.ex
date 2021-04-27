@@ -20,6 +20,12 @@ defmodule PluggyElixir.HttpClient do
   def post(url, body, query \\ [], %Config{} = config),
     do: http_request(%{method: :post, url: url, body: body, query: query}, config)
 
+  @spec patch(HttpAdapter.url(), HttpAdapter.body(), HttpAdapter.query(), Config.t()) ::
+          {:ok, Response.t()} | {:error, binary()}
+
+  def patch(url, body, query \\ [], %Config{} = config),
+    do: http_request(%{method: :patch, url: url, body: body, query: query}, config)
+
   defp http_request(request, config) do
     with %Auth{} = auth <- retrieve_auth(config),
          authenticated <- authenticate(auth, request),
@@ -53,10 +59,11 @@ defmodule PluggyElixir.HttpClient do
        do: {:performed, http_adapter.get(url, query, headers, config)}
 
   defp perform_request(
-         %{method: :post, url: url, body: body, query: query, headers: headers},
+         %{method: method, url: url, body: body, query: query, headers: headers},
          %{adapter: %{module: http_adapter}} = config
-       ),
-       do: {:performed, http_adapter.post(url, body, query, headers, config)}
+       )
+       when method in [:post, :patch, :put],
+       do: {:performed, apply(http_adapter, method, [url, body, query, headers, config])}
 
   defp retrieve_auth(config) do
     case Guard.get_auth() do

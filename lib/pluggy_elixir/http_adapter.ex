@@ -21,4 +21,7 @@ defmodule PluggyElixir.HttpAdapter do
 
   @doc "Perform a HTTP request with POST method"
   @callback post(url, body(), query, headers(), Config.t()) :: adapter_response()
+
+  @doc "Perform a HTTP request with PATCH method"
+  @callback patch(url, body(), query, headers(), Config.t()) :: adapter_response()
 end
