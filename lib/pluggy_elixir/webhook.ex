@@ -30,7 +30,7 @@ defmodule PluggyElixir.Webhook do
            event: "item/updated",
            id: "3f1f222b-6efa-4736-8ded-8b14646f79bc",
            updated_at: ~N[2021-04-26 17:41:12.093],
-           url: "https://yourapp.com.br/webhook"
+           url: "https://finbits.com.br/webhook"
          }
        ]}
   """
@@ -40,13 +40,45 @@ defmodule PluggyElixir.Webhook do
   def all(config_overrides \\ []) do
     @webhooks_path
     |> HttpClient.get(Config.override(config_overrides))
-    |> handle_response()
+    |> handle_response(:all)
   end
 
-  defp handle_response({:ok, %{status: 200, body: %{"results" => result}}}),
+  @doc """
+  Register a new global webhook
+
+  ### Examples
+
+      iex> Webhook.create(%{event: "all", url: "https://finbits.com.br/webhook"})
+      {:ok,
+       %Webhook{
+         created_at: ~N[2021-04-26 17:41:12.093],
+         event: "all",
+         id: "3f1f889b-6efa-4736-8ded-8b14646f79ca",
+         updated_at: ~N[2021-04-26 17:41:12.093],
+         url: "https://finbits.com.br/webhook"
+       }}
+  """
+
+  @spec create(%{event: binary(), url: binary()}, Config.config_overrides()) ::
+          {:ok, [t()]} | {:error, PluggyElixir.HttpClient.Error.t() | binary()}
+
+  def create(params, config_overrides \\ [])
+
+  def create(%{event: _event, url: _url} = params, config_overrides) do
+    @webhooks_path
+    |> HttpClient.post(params, Config.override(config_overrides))
+    |> handle_response(:create)
+  end
+
+  def create(_params, _config_overrides), do: {:error, ":event and :url are required"}
+
+  defp handle_response({:ok, %{status: 200, body: result}}, :create),
+    do: {:ok, parse(result)}
+
+  defp handle_response({:ok, %{status: 200, body: %{"results" => result}}}, :all),
     do: {:ok, Enum.map(result, &parse/1)}
 
-  defp handle_response({:error, _reason} = error), do: error
+  defp handle_response({:error, _reason} = error, _caller), do: error
 
   defp parse(webhook) do
     %__MODULE__{
