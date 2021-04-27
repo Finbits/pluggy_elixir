@@ -8,11 +8,11 @@ defmodule PluggyElixir.Webhook do
   defstruct [:created_at, :event, :id, :updated_at, :url]
 
   @type t() :: %__MODULE__{
-          event: binary(),
-          created_at: NaiveDateTime.t(),
-          updated_at: NaiveDateTime.t(),
           id: binary(),
-          url: binary()
+          event: binary(),
+          url: binary(),
+          created_at: NaiveDateTime.t(),
+          updated_at: NaiveDateTime.t()
         }
 
   @webhooks_path "/webhooks"
