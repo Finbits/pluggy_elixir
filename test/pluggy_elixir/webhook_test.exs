@@ -8,6 +8,8 @@ defmodule PluggyElixir.WebhookTest do
     test "return all created webhooks", %{bypass: bypass} do
       create_and_save_api_key()
 
+      config_overrides = [host: "http://localhost:#{bypass.port}"]
+
       bypass_expect(bypass, "GET", "/webhooks", fn conn ->
         Conn.resp(
           conn,
@@ -16,7 +18,7 @@ defmodule PluggyElixir.WebhookTest do
         )
       end)
 
-      assert {:ok, webhooks} = Webhook.all()
+      assert {:ok, webhooks} = Webhook.all(config_overrides)
 
       assert webhooks == [
                %PluggyElixir.Webhook{
@@ -31,24 +33,27 @@ defmodule PluggyElixir.WebhookTest do
 
     test "return an empty list when there is not webhook created", %{bypass: bypass} do
       create_and_save_api_key()
+      config_overrides = [host: "http://localhost:#{bypass.port}"]
 
       bypass_expect(bypass, "GET", "/webhooks", fn conn ->
         Conn.resp(conn, 200, ~s<{"results":[]}>)
       end)
 
-      assert {:ok, webhooks} = Webhook.all()
+      assert {:ok, webhooks} = Webhook.all(config_overrides)
 
       assert webhooks == []
     end
 
     test "when has error to get webhook list, returns that error", %{bypass: bypass} do
       create_and_save_api_key()
+      config_overrides = [host: "http://localhost:#{bypass.port}"]
 
       bypass_expect(bypass, "GET", "/webhooks", fn conn ->
         Conn.resp(conn, 500, ~s<{"message":"Internal Server Error"}>)
       end)
 
-      assert Webhook.all() == {:error, %Error{message: "Internal Server Error", code: 500}}
+      assert Webhook.all(config_overrides) ==
+               {:error, %Error{message: "Internal Server Error", code: 500}}
     end
   end
 end

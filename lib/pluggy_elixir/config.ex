@@ -19,36 +19,104 @@ defmodule PluggyElixir.Config do
   - sandbox: A boolean value to enable using sandbox `Connector`. (default is `false`)
   - host: A string containing the API host. (default is `"api.pluggy.ai"`)
 
+  ## Configuration Override
+  You can always override the configuration by passing a keyword to client functions
+
+  ### Example
+      iex> PluggyElixir.Auth.create_api_key(client_id: "someid", client_secret: "somesecret")
+
+  Overridable configs
+  - client_id
+  - client_secret
+  - scope
+  - non_expiring_api_key
+  - sandbox
+  - host
+
   """
+
+  defmodule Auth do
+    @moduledoc false
+    defstruct([:scope, :client_id, :client_secret, :api_key, :non_expiring_api_key])
+
+    @type t() :: %__MODULE__{
+            scope: binary(),
+            client_id: binary(),
+            client_secret: binary(),
+            api_key: binary(),
+            non_expiring_api_key: boolean()
+          }
+  end
+
+  defmodule Adapter do
+    @moduledoc false
+    defstruct([:module, :configs])
+
+    @type t() :: %__MODULE__{
+            module: atom(),
+            configs: Keyword.t()
+          }
+  end
+
+  alias PluggyElixir.Config.{Adapter, Auth}
+
+  defstruct [:host, :sandbox, :auth, :adapter]
+
+  @type t :: %__MODULE__{
+          host: URI.t(),
+          sandbox: boolean(),
+          auth: Auth.t(),
+          adapter: Adapter.t()
+        }
+
+  @typedoc """
+  You can create separeted scope for your authentication by specifying a scope key
+  """
+  @type scope :: {:scope, binary()}
+
+  @type config_overrides :: [
+          {:client_id, binary()}
+          | {:client_secret, binary()}
+          | {:non_expiring_api_key, boolean()}
+          | {:sandbox, boolean()}
+          | {:host, binary()}
+          | scope()
+        ]
 
   @default_host "api.pluggy.ai"
 
   @doc false
-  def get_client_id, do: get_config(:client_id)
-
-  @doc false
-  def get_client_secret, do: get_config(:client_secret)
-
-  @doc false
-  def get_host_uri do
-    ~r"(?<scheme>http[s]?)?(:[\/]{2})?(?<host>[\w\.]+)(:?(?<port>\d+))?(\/(?<path>.*))?"
-    |> Regex.named_captures(get_config(:host, @default_host))
-    |> to_uri()
+  @spec override(config_overrides()) :: t()
+  def override(overrides) do
+    :pluggy_elixir
+    |> Application.get_all_env()
+    |> Keyword.merge(overrides)
+    |> build_config()
   end
 
-  @doc false
-  def non_expiring_api_key,
-    do: if(get_config(:non_expiring_api_key, false) == true, do: true, else: false)
+  defp build_config(configs) do
+    %__MODULE__{
+      host: host_uri(configs),
+      sandbox: ensure_boolean(get(configs, :sandbox)),
+      adapter: %Adapter{
+        module: PluggyElixir.HttpAdapter.Tesla,
+        configs: [adapter: Tesla.Adapter.Hackney]
+      },
+      auth: %Auth{
+        scope: get(configs, :scope, "pluggy_elixir"),
+        client_id: get(configs, :client_id, :pluggy_elixir),
+        client_secret: get(configs, :client_secret, :pluggy_elixir),
+        api_key: get(configs, :api_key),
+        non_expiring_api_key: ensure_boolean(get(configs, :non_expiring_api_key))
+      }
+    }
+  end
 
-  @doc false
-  def sandbox,
-    do: if(get_config(:sandbox, false) == true, do: true, else: false)
-
-  @doc false
-  def get_http_adapter_config, do: [adapter: Tesla.Adapter.Hackney]
-
-  @doc false
-  def get_http_adapter, do: PluggyElixir.HttpAdapter.Tesla
+  defp host_uri(configs) do
+    ~r"(?<scheme>http[s]?)?(:[\/]{2})?(?<host>[\w\.]+)(:?(?<port>\d+))?(\/(?<path>.*))?"
+    |> Regex.named_captures(get(configs, :host, @default_host))
+    |> to_uri()
+  end
 
   defp to_uri(captures) do
     %URI{
@@ -59,6 +127,9 @@ defmodule PluggyElixir.Config do
     }
   end
 
+  defp port_to_integer(port) when is_binary(port), do: String.to_integer(port)
+  defp port_to_integer(port), do: port
+
   defp get_captured(captures, key, default \\ nil) do
     case Map.get(captures, key, default) do
       "" -> default
@@ -66,18 +137,9 @@ defmodule PluggyElixir.Config do
     end
   end
 
-  defp port_to_integer(port) when is_binary(port), do: String.to_integer(port)
-  defp port_to_integer(port), do: port
+  defp ensure_boolean(true), do: true
+  defp ensure_boolean(_any), do: false
 
-  defp get_config(key, default_value \\ :required, custom_message \\ nil) do
-    case Application.get_env(:pluggy_elixir, key, default_value) do
-      :required -> config_error(key, custom_message)
-      value -> config_success(value, default_value)
-    end
-  end
-
-  defp config_error(key, nil), do: {:error, "Missing PluggyElixir configuration: [ #{key} ]"}
-
-  defp config_success(value, :required), do: {:ok, value}
-  defp config_success(value, _no_required), do: value
+  defp get(keyword, key, default \\ nil),
+    do: Keyword.get(keyword, key, default)
 end

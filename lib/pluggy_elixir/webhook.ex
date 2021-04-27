@@ -3,7 +3,7 @@ defmodule PluggyElixir.Webhook do
   Handle webhooks actions.
   """
 
-  alias PluggyElixir.HttpClient
+  alias PluggyElixir.{Config, HttpClient}
 
   defstruct [:created_at, :event, :id, :updated_at, :url]
 
@@ -35,11 +35,11 @@ defmodule PluggyElixir.Webhook do
        ]}
   """
 
-  @spec all :: {:ok, [t()]} | {:error, PluggyElixir.Error.t()}
+  @spec all(Config.config_overrides()) :: {:ok, [t()]} | {:error, PluggyElixir.Error.t()}
 
-  def all do
+  def all(config_overrides \\ []) do
     @webhooks_path
-    |> HttpClient.get()
+    |> HttpClient.get(Config.override(config_overrides))
     |> handle_response()
   end
 

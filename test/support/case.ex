@@ -16,7 +16,7 @@ defmodule PluggyElixir.Case do
   end
 
   setup _tags do
-    bypass = Bypass.open(port: Application.fetch_env!(:bypass, :port))
+    bypass = Bypass.open()
 
     {:ok, bypass: bypass}
   end

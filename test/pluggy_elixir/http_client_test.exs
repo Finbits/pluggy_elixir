@@ -1,16 +1,17 @@
 defmodule PluggyElixir.HttpClientTest do
   use PluggyElixir.Case, async: false
 
-  alias PluggyElixir.Auth
+  alias PluggyElixir.{Auth, Config, HttpClient}
   alias PluggyElixir.Auth.Guard
   alias PluggyElixir.HttpAdapter.Response
-  alias PluggyElixir.HttpClient
   alias PluggyElixir.HttpClient.Error
 
   describe "[ authentication flow ]" do
     test "create api token when there inst and make get request", %{bypass: bypass} do
       url = "/transactions"
       created_api_key = "http-client-valid-api-key-001"
+
+      config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "POST", "auth", fn conn ->
         Conn.resp(conn, 200, ~s<{"apiKey": "#{created_api_key}"}>)
@@ -24,7 +25,7 @@ defmodule PluggyElixir.HttpClientTest do
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
-      response = HttpClient.get(url)
+      response = HttpClient.get(url, config_overrides)
 
       assert {:ok, %Response{}} = response
 
@@ -36,11 +37,13 @@ defmodule PluggyElixir.HttpClientTest do
     test "reutrn unauthorized error when try to create api token", %{bypass: bypass} do
       url = "/transactions"
 
+      config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
+
       bypass_expect(bypass, "POST", "auth", fn conn ->
         Conn.resp(conn, 401, ~s<{"message":"Client keys are invalid","code":401}>)
       end)
 
-      response = HttpClient.get(url)
+      response = HttpClient.get(url, config_overrides)
 
       assert {:error, %Error{} = error} = response
 
@@ -54,6 +57,7 @@ defmodule PluggyElixir.HttpClientTest do
     test "use preseted api key", %{bypass: bypass} do
       url = "/transactions"
       created_api_key = "http-client-valid-api-key-002"
+      config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       Guard.set_auth(%Auth{api_key: created_api_key})
 
@@ -65,7 +69,7 @@ defmodule PluggyElixir.HttpClientTest do
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
-      response = HttpClient.get(url)
+      response = HttpClient.get(url, config_overrides)
 
       assert {:ok, %Response{}} = response
     end
@@ -74,6 +78,8 @@ defmodule PluggyElixir.HttpClientTest do
       url = "/transactions"
       expired_api_key = create_and_save_api_key()
       created_api_key = "http-client-valid-api-key-003"
+
+      config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "GET", url, fn %{req_headers: headers} = conn ->
         case Enum.find(headers, &(elem(&1, 0) == "x-api-key")) do
@@ -89,7 +95,7 @@ defmodule PluggyElixir.HttpClientTest do
         Conn.resp(conn, 200, ~s<{"apiKey": "#{created_api_key}"}>)
       end)
 
-      response = HttpClient.get(url)
+      response = HttpClient.get(url, config_overrides)
 
       assert {:ok, %Response{}} = response
 
@@ -102,6 +108,8 @@ defmodule PluggyElixir.HttpClientTest do
       url = "/transactions"
       create_and_save_api_key()
 
+      config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
+
       bypass_expect(bypass, "GET", url, fn conn ->
         Conn.resp(conn, 403, ~s<{"message":"Missing or invalid authorization token"}>)
       end)
@@ -110,7 +118,7 @@ defmodule PluggyElixir.HttpClientTest do
         Conn.resp(conn, 401, ~s<{"message":"Client keys are invalid","code":401}>)
       end)
 
-      response = HttpClient.get(url)
+      response = HttpClient.get(url, config_overrides)
 
       assert {:error, %Error{}} = response
     end
@@ -123,13 +131,15 @@ defmodule PluggyElixir.HttpClientTest do
       url = "/transactions"
       query = [custom: "custom-value"]
 
+      config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
+
       bypass_expect(bypass, "GET", url, fn conn ->
         assert conn.query_params == %{"custom" => "custom-value", "sandbox" => "true"}
 
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
-      response = HttpClient.get(url, query)
+      response = HttpClient.get(url, query, config_overrides)
 
       assert {:ok, %Response{status: 200, body: %{"message" => "ok"}}} = response
     end
@@ -143,6 +153,8 @@ defmodule PluggyElixir.HttpClientTest do
       body = %{key: "value"}
       query = [custom: "custom-value"]
 
+      config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
+
       bypass_expect(bypass, "POST", url, fn conn ->
         assert conn.query_params == %{"custom" => "custom-value", "sandbox" => "true"}
         assert conn.body_params == %{"key" => "value"}
@@ -150,7 +162,7 @@ defmodule PluggyElixir.HttpClientTest do
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
-      response = HttpClient.post(url, body, query)
+      response = HttpClient.post(url, body, query, config_overrides)
 
       assert {:ok, %Response{status: 200, body: %{"message" => "ok"}}} = response
     end
@@ -162,11 +174,13 @@ defmodule PluggyElixir.HttpClientTest do
 
       url = "/transactions"
 
+      config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
+
       bypass_expect(bypass, "GET", url, fn conn ->
         Conn.resp(conn, 403, ~s<{"message":"Forbidden"}>)
       end)
 
-      response = HttpClient.get(url)
+      response = HttpClient.get(url, config_overrides)
 
       assert response == {:error, %Error{message: "Forbidden", code: 403}}
     end
