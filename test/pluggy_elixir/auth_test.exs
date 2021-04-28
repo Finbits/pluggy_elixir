@@ -2,7 +2,7 @@ defmodule PluggyElixir.AuthTest do
   use PluggyElixir.Case, async: false
 
   alias PluggyElixir.Auth
-  alias PluggyElixir.Error.Unauthorized
+  alias PluggyElixir.HttpClient.Error
 
   setup do
     config = Application.get_all_env(:pluggy_elixir)
@@ -60,7 +60,8 @@ defmodule PluggyElixir.AuthTest do
         Conn.resp(conn, 401, ~s<{"message":"Client keys are invalid","code":401}>)
       end)
 
-      assert Auth.create_api_key() == {:error, %Unauthorized{message: "Client keys are invalid"}}
+      assert Auth.create_api_key() ==
+               {:error, %Error{message: "Client keys are invalid", code: 401}}
     end
   end
 end

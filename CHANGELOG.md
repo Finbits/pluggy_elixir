@@ -7,4 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Get all webhooks
+
 [unreleased]: https://github.com/brainnco/strong_params/compare/main
