@@ -8,37 +8,47 @@ defmodule PluggyElixir.HttpAdapter.Tesla do
   @behaviour PluggyElixir.HttpAdapter
 
   @impl true
-  def post(url, body, query \\ [], headers \\ []) do
-    build_client()
-    |> Tesla.post(url, body, build_options(query, headers))
+  def post(url, body, query \\ [], headers \\ [], %Config{} = config) do
+    config
+    |> build_client()
+    |> Tesla.post(url, body, build_options(query, headers, config))
     |> format_response()
   end
 
   @impl true
-  def get(url, query \\ [], headers \\ []) do
-    build_client()
-    |> Tesla.get(url, build_options(query, headers))
+  def get(url, query \\ [], headers \\ [], %Config{} = config) do
+    config
+    |> build_client()
+    |> Tesla.get(url, build_options(query, headers, config))
     |> format_response()
   end
 
-  defp build_options(query, headers) do
+  @impl true
+  def patch(url, body, query \\ [], headers \\ [], %Config{} = config) do
+    config
+    |> build_client()
+    |> Tesla.patch(url, body, build_options(query, headers, config))
+    |> format_response()
+  end
+
+  defp build_options(query, headers, %{sandbox: sandbox}) do
     [
-      query: build_query(query),
+      query: build_query(query, sandbox),
       headers: headers
     ]
   end
 
-  defp build_query(query),
-    do: if(Config.sandbox(), do: Keyword.merge(query, sandbox: true), else: query)
+  defp build_query(query, true), do: Keyword.merge(query, sandbox: true)
+  defp build_query(query, _false), do: query
 
-  defp build_client do
+  defp build_client(config) do
     Tesla.client(
       [
-        {Tesla.Middleware.BaseUrl, host_uri()},
+        {Tesla.Middleware.BaseUrl, host_uri(config)},
         {Tesla.Middleware.Headers, [{"content-type", "application/json"}]},
         Tesla.Middleware.JSON
       ],
-      Keyword.fetch!(Config.get_http_adapter_config(), :adapter)
+      get_tesla_adapter(config)
     )
   end
 
@@ -53,5 +63,8 @@ defmodule PluggyElixir.HttpAdapter.Tesla do
 
   defp format_response({:error, reason}), do: {:error, inspect(reason)}
 
-  defp host_uri, do: to_string(Config.get_host_uri())
+  defp get_tesla_adapter(%{adapter: %{configs: adapter_config}}),
+    do: Keyword.fetch!(adapter_config, :adapter)
+
+  defp host_uri(%{host: host}), do: to_string(host)
 end

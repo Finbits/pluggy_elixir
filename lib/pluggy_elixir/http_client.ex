@@ -8,53 +8,72 @@ defmodule PluggyElixir.HttpClient do
 
   @expired_msg "Missing or invalid authorization token"
 
-  @spec get(HttpAdapter.url(), HttpAdapter.query()) :: {:ok, Response.t()} | {:error, binary()}
-
-  def get(url, query \\ []), do: http_request(%{method: :get, url: url, query: query})
-
-  @spec post(HttpAdapter.url(), HttpAdapter.body(), HttpAdapter.query()) ::
+  @spec get(HttpAdapter.url(), HttpAdapter.query(), Config.t()) ::
           {:ok, Response.t()} | {:error, binary()}
 
-  def post(url, body, query \\ []),
-    do: http_request(%{method: :post, url: url, body: body, query: query})
+  def get(url, query \\ [], %Config{} = config),
+    do: http_request(%{method: :get, url: url, query: query}, config)
 
-  defp http_request(request) do
-    with %Auth{} = auth <- retrieve_auth(),
+  @spec post(HttpAdapter.url(), HttpAdapter.body(), HttpAdapter.query(), Config.t()) ::
+          {:ok, Response.t()} | {:error, binary()}
+
+  def post(url, body, query \\ [], %Config{} = config),
+    do: http_request(%{method: :post, url: url, body: body, query: query}, config)
+
+  @spec patch(HttpAdapter.url(), HttpAdapter.body(), HttpAdapter.query(), Config.t()) ::
+          {:ok, Response.t()} | {:error, binary()}
+
+  def patch(url, body, query \\ [], %Config{} = config),
+    do: http_request(%{method: :patch, url: url, body: body, query: query}, config)
+
+  defp http_request(request, config) do
+    with %Auth{} = auth <- retrieve_auth(config),
          authenticated <- authenticate(auth, request),
-         {:performed, response} <- perform_request(authenticated),
-         result <- return_or_retry(response, request) do
+         {:performed, response} <- perform_request(authenticated, config),
+         result <- return_or_retry(response, request, config) do
       handle_result(result)
     end
   end
 
-  defp return_or_retry({:ok, %Response{status: 403, body: %{"message" => @expired_msg}}}, request) do
-    with %Auth{} = auth <- renew_auth(),
+  defp return_or_retry(
+         {:ok, %Response{status: 403, body: %{"message" => @expired_msg}}},
+         request,
+         config
+       ) do
+    with %Auth{} = auth <- renew_auth(config),
          authenticated <- authenticate(auth, request),
-         {:performed, response} <- perform_request(authenticated) do
+         {:performed, response} <- perform_request(authenticated, config) do
       response
     end
   end
 
-  defp return_or_retry(return, _request), do: return
+  defp return_or_retry(return, _request, _config), do: return
 
   defp authenticate(%Auth{api_key: api_key}, request),
     do: Map.put(request, :headers, [{"X-API-KEY", api_key}])
 
-  defp perform_request(%{method: :get, url: url, query: query, headers: headers}),
-    do: {:performed, http_adapter().get(url, query, headers)}
+  defp perform_request(
+         %{method: :get, url: url, query: query, headers: headers},
+         %{adapter: %{module: http_adapter}} = config
+       ),
+       do: {:performed, http_adapter.get(url, query, headers, config)}
 
-  defp perform_request(%{method: :post, url: url, body: body, query: query, headers: headers}),
-    do: {:performed, http_adapter().post(url, body, query, headers)}
+  defp perform_request(
+         %{method: method, url: url, body: body, query: query, headers: headers},
+         %{adapter: %{module: http_adapter}} = config
+       )
+       when method in [:post, :patch, :put],
+       do: {:performed, apply(http_adapter, method, [url, body, query, headers, config])}
 
-  defp retrieve_auth do
+  defp retrieve_auth(config) do
     case Guard.get_auth() do
       %Auth{} = auth -> auth
-      _any -> renew_auth()
+      _any -> renew_auth(config)
     end
   end
 
-  defp renew_auth do
-    case Auth.create_api_key() do
+  defp renew_auth(config) do
+    case Auth.create_api_key(config) do
       {:ok, auth} ->
         Guard.set_auth(auth)
         auth
@@ -73,6 +92,4 @@ defmodule PluggyElixir.HttpClient do
     do: {:error, Error.parse(response)}
 
   defp handle_result({:error, _reason} = error), do: error
-
-  defp http_adapter, do: Config.get_http_adapter()
 end
