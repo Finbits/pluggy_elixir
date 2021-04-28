@@ -268,7 +268,7 @@ defmodule PluggyElixir.WebhookTest do
              }
     end
 
-    test "when using missing params, returns a validation error" do
+    test "when missing params, returns a validation error" do
       invalid_params = %{}
 
       assert Webhook.update(invalid_params) == {:error, ":id and :event are required"}
