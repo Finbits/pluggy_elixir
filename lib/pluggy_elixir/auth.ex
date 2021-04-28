@@ -4,7 +4,7 @@ defmodule PluggyElixir.Auth do
   """
 
   alias PluggyElixir.Config
-  alias PluggyElixir.Error
+  alias PluggyElixir.HttpClient.Error
 
   @auth_path "/auth"
 

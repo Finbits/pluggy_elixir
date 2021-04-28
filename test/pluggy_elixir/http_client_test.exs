@@ -1,11 +1,11 @@
 defmodule PluggyElixir.HttpClientTest do
-  use PluggyElixir.Case, async: true
+  use PluggyElixir.Case, async: false
 
   alias PluggyElixir.Auth
   alias PluggyElixir.Auth.Guard
-  alias PluggyElixir.Error.Unauthorized
   alias PluggyElixir.HttpAdapter.Response
   alias PluggyElixir.HttpClient
+  alias PluggyElixir.HttpClient.Error
 
   describe "[ authentication flow ]" do
     test "create api token when there inst and make get request", %{bypass: bypass} do
@@ -42,7 +42,7 @@ defmodule PluggyElixir.HttpClientTest do
 
       response = HttpClient.get(url)
 
-      assert {:error, %Unauthorized{} = error} = response
+      assert {:error, %Error{} = error} = response
 
       pid = inspect(self())
 
@@ -112,7 +112,7 @@ defmodule PluggyElixir.HttpClientTest do
 
       response = HttpClient.get(url)
 
-      assert {:error, %Unauthorized{}} = response
+      assert {:error, %Error{}} = response
     end
   end
 
@@ -153,6 +153,22 @@ defmodule PluggyElixir.HttpClientTest do
       response = HttpClient.post(url, body, query)
 
       assert {:ok, %Response{status: 200, body: %{"message" => "ok"}}} = response
+    end
+  end
+
+  describe "[ error handle ]" do
+    test "parse a forbidden error", %{bypass: bypass} do
+      create_and_save_api_key()
+
+      url = "/transactions"
+
+      bypass_expect(bypass, "GET", url, fn conn ->
+        Conn.resp(conn, 403, ~s<{"message":"Forbidden"}>)
+      end)
+
+      response = HttpClient.get(url)
+
+      assert response == {:error, %Error{message: "Forbidden", code: 403}}
     end
   end
 end
