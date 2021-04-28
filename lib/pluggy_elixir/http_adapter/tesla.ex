@@ -23,6 +23,14 @@ defmodule PluggyElixir.HttpAdapter.Tesla do
     |> format_response()
   end
 
+  @impl true
+  def patch(url, body, query \\ [], headers \\ [], %Config{} = config) do
+    config
+    |> build_client()
+    |> Tesla.patch(url, body, build_options(query, headers, config))
+    |> format_response()
+  end
+
   defp build_options(query, headers, %{sandbox: sandbox}) do
     [
       query: build_query(query, sandbox),

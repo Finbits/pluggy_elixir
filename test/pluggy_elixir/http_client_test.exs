@@ -168,6 +168,29 @@ defmodule PluggyElixir.HttpClientTest do
     end
   end
 
+  describe "patch/2" do
+    test "perform a patch request", %{bypass: bypass} do
+      create_and_save_api_key()
+
+      url = "/transactions"
+      body = %{key: "value"}
+      query = [custom: "custom-value"]
+
+      config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
+
+      bypass_expect(bypass, "PATCH", url, fn conn ->
+        assert conn.query_params == %{"custom" => "custom-value", "sandbox" => "true"}
+        assert conn.body_params == %{"key" => "value"}
+
+        Conn.resp(conn, 200, ~s<{"message": "ok"}>)
+      end)
+
+      response = HttpClient.patch(url, body, query, config_overrides)
+
+      assert {:ok, %Response{status: 200, body: %{"message" => "ok"}}} = response
+    end
+  end
+
   describe "[ error handle ]" do
     test "parse a forbidden error", %{bypass: bypass} do
       create_and_save_api_key()
