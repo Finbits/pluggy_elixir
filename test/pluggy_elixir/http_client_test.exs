@@ -207,5 +207,33 @@ defmodule PluggyElixir.HttpClientTest do
 
       assert response == {:error, %Error{message: "Forbidden", code: 403}}
     end
+
+    test "handle non JSON response errors", %{bypass: bypass} do
+      create_and_save_api_key()
+
+      url = "/transactions"
+
+      config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
+
+      bypass_expect(bypass, "GET", url, fn conn ->
+        Conn.resp(
+          conn,
+          500,
+          ~s[<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>Internal Server Error</pre></body></html>]
+        )
+      end)
+
+      response = HttpClient.get(url, config_overrides)
+
+      assert response == {
+               :error,
+               %Error{
+                 code: 500,
+                 message: "response body is not a valid JSON",
+                 details:
+                   ~s[<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>Internal Server Error</pre></body></html>]
+               }
+             }
+    end
   end
 end

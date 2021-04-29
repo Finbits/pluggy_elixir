@@ -116,11 +116,12 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "POST", url, fn conn ->
-        Conn.resp(conn, 200, ~s<not a valid json>)
+        Conn.resp(conn, 200, ~s<plain text response>)
       end)
 
       assert Tesla.post(url, %{}, [], config_overrides) ==
-               {:error, "response body is not a valid JSON"}
+               {:error,
+                %{message: "response body is not a valid JSON", details: "plain text response"}}
     end
 
     test "return error when server is down", %{bypass: bypass} do
@@ -247,10 +248,12 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "GET", url, fn conn ->
-        Conn.resp(conn, 200, ~s<not a valid json>)
+        Conn.resp(conn, 200, ~s<plain text response>)
       end)
 
-      assert Tesla.get(url, config_overrides) == {:error, "response body is not a valid JSON"}
+      assert Tesla.get(url, config_overrides) ==
+               {:error,
+                %{message: "response body is not a valid JSON", details: "plain text response"}}
     end
 
     test "return error when server is down", %{bypass: bypass} do
@@ -382,11 +385,12 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "PATCH", url, fn conn ->
-        Conn.resp(conn, 200, ~s<not a valid json>)
+        Conn.resp(conn, 200, ~s<plain text response>)
       end)
 
       assert Tesla.patch(url, %{}, [], config_overrides) ==
-               {:error, "response body is not a valid JSON"}
+               {:error,
+                %{message: "response body is not a valid JSON", details: "plain text response"}}
     end
 
     test "return error when server is down", %{bypass: bypass} do

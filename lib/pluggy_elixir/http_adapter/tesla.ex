@@ -58,8 +58,8 @@ defmodule PluggyElixir.HttpAdapter.Tesla do
   defp format_response({:error, reason}) when is_atom(reason),
     do: {:error, Atom.to_string(reason)}
 
-  defp format_response({:error, {Tesla.Middleware.JSON, :decode, _error}}),
-    do: {:error, "response body is not a valid JSON"}
+  defp format_response({:error, {Tesla.Middleware.JSON, :decode, %{data: invalid_json}}}),
+    do: {:error, %{message: "response body is not a valid JSON", details: invalid_json}}
 
   defp format_response({:error, reason}), do: {:error, inspect(reason)}
 
