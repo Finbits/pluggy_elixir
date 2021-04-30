@@ -1,8 +1,8 @@
 defmodule PluggyElixir.TransactionTest do
   use PluggyElixir.Case
 
-  alias PluggyElixir.Transaction
   alias PluggyElixir.HttpClient.Error
+  alias PluggyElixir.Transaction
 
   describe "all_by_account/4" do
     test "list transactions of an account and period", %{bypass: bypass} do
@@ -17,15 +17,6 @@ defmodule PluggyElixir.TransactionTest do
       create_and_save_api_key()
 
       bypass_expect(bypass, "GET", "/transactions", fn conn ->
-        assert conn.query_params == %{
-                 "accountId" => "d619cfde-a8d7-4fe0-a10d-6de488bde4e0",
-                 "from" => "2020-01-01",
-                 "sandbox" => "true",
-                 "to" => "2020-02-01",
-                 "pageSize" => "20",
-                 "page" => "1"
-               }
-
         Conn.resp(
           conn,
           200,
@@ -34,6 +25,17 @@ defmodule PluggyElixir.TransactionTest do
       end)
 
       assert {:ok, result} = Transaction.all_by_account(params, config_overrides)
+
+      assert_pluggy(%{
+        query_params: %{
+          "accountId" => "d619cfde-a8d7-4fe0-a10d-6de488bde4e0",
+          "from" => "2020-01-01",
+          "sandbox" => "true",
+          "to" => "2020-02-01",
+          "pageSize" => "20",
+          "page" => "1"
+        }
+      })
 
       assert result == %{
                page: 1,
@@ -110,15 +112,6 @@ defmodule PluggyElixir.TransactionTest do
       create_and_save_api_key()
 
       bypass_expect(bypass, "GET", "/transactions", fn conn ->
-        assert conn.query_params == %{
-                 "accountId" => "d619cfde-a8d7-4fe0-a10d-6de488bde4e0",
-                 "from" => "2020-01-01",
-                 "sandbox" => "true",
-                 "to" => "2020-02-01",
-                 "pageSize" => "1",
-                 "page" => "2"
-               }
-
         Conn.resp(
           conn,
           200,
@@ -127,6 +120,17 @@ defmodule PluggyElixir.TransactionTest do
       end)
 
       assert {:ok, result} = Transaction.all_by_account(params, config_overrides)
+
+      assert_pluggy(%{
+        query_params: %{
+          "accountId" => "d619cfde-a8d7-4fe0-a10d-6de488bde4e0",
+          "from" => "2020-01-01",
+          "sandbox" => "true",
+          "to" => "2020-02-01",
+          "pageSize" => "1",
+          "page" => "2"
+        }
+      })
 
       assert result == %{
                page: 2,

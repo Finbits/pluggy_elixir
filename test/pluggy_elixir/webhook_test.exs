@@ -80,6 +80,10 @@ defmodule PluggyElixir.WebhookTest do
 
       assert {:ok, result} = Webhook.create(params, config_overrides)
 
+      assert_pluggy(%{
+        body_params: %{"event" => "all", "url" => "https://finbits.com.br/webhook"}
+      })
+
       assert result == %Webhook{
                created_at: ~N[2020-06-24 21:29:40.300],
                event: params.event,
@@ -192,8 +196,6 @@ defmodule PluggyElixir.WebhookTest do
       config_overrides = [host: "http://localhost:#{bypass.port}"]
 
       bypass_expect(bypass, "PATCH", "/webhooks/:id", fn %{body_params: body} = conn ->
-        assert conn.params["id"] == id
-
         Conn.resp(
           conn,
           200,
@@ -202,6 +204,11 @@ defmodule PluggyElixir.WebhookTest do
       end)
 
       assert {:ok, result} = Webhook.update(params, config_overrides)
+
+      assert_pluggy(%{
+        params: %{"id" => ^id},
+        body_params: %{"event" => "all", "url" => "https://finbits.com.br/updated_webhook"}
+      })
 
       assert result == %Webhook{
                created_at: ~N[2020-06-24 21:29:40.300],
