@@ -17,10 +17,8 @@ defmodule PluggyElixir.HttpClientTest do
         Conn.resp(conn, 200, ~s<{"apiKey": "#{created_api_key}"}>)
       end)
 
-      bypass_expect(bypass, "GET", url, fn conn ->
-        assert Enum.any?(conn.req_headers, fn header ->
-                 header == {"x-api-key", created_api_key}
-               end)
+      bypass_expect(bypass, "GET", url, fn %{req_headers: headers} = conn ->
+        assert Enum.any?(headers, &(&1 == {"x-api-key", created_api_key}))
 
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
@@ -62,14 +60,14 @@ defmodule PluggyElixir.HttpClientTest do
       Guard.set_auth(%Auth{api_key: created_api_key})
 
       bypass_expect(bypass, "GET", url, fn conn ->
-        assert Enum.any?(conn.req_headers, fn header ->
-                 header == {"x-api-key", created_api_key}
-               end)
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       response = HttpClient.get(url, config_overrides)
+
+      assert_pluggy(fn %{req_headers: headers} ->
+        assert Enum.any?(headers, &(&1 == {"x-api-key", created_api_key}))
+      end)
 
       assert {:ok, %Response{}} = response
     end
@@ -134,13 +132,12 @@ defmodule PluggyElixir.HttpClientTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "GET", url, fn conn ->
-        assert conn.query_params == %{"custom" => "custom-value", "sandbox" => "true"}
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       response = HttpClient.get(url, query, config_overrides)
 
+      assert_pluggy(%{query_params: %{"custom" => "custom-value", "sandbox" => "true"}})
       assert {:ok, %Response{status: 200, body: %{"message" => "ok"}}} = response
     end
   end
@@ -156,13 +153,15 @@ defmodule PluggyElixir.HttpClientTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "POST", url, fn conn ->
-        assert conn.query_params == %{"custom" => "custom-value", "sandbox" => "true"}
-        assert conn.body_params == %{"key" => "value"}
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       response = HttpClient.post(url, body, query, config_overrides)
+
+      assert_pluggy(%{
+        query_params: %{"custom" => "custom-value", "sandbox" => "true"},
+        body_params: %{"key" => "value"}
+      })
 
       assert {:ok, %Response{status: 200, body: %{"message" => "ok"}}} = response
     end
@@ -179,13 +178,15 @@ defmodule PluggyElixir.HttpClientTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "PATCH", url, fn conn ->
-        assert conn.query_params == %{"custom" => "custom-value", "sandbox" => "true"}
-        assert conn.body_params == %{"key" => "value"}
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       response = HttpClient.patch(url, body, query, config_overrides)
+
+      assert_pluggy(%{
+        query_params: %{"custom" => "custom-value", "sandbox" => "true"},
+        body_params: %{"key" => "value"}
+      })
 
       assert {:ok, %Response{status: 200, body: %{"message" => "ok"}}} = response
     end

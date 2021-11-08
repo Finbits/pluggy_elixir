@@ -12,14 +12,14 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "POST", url, fn conn ->
-        assert conn.body_params == body
-
         conn
         |> Conn.put_resp_header("custom-header", "custom-value")
         |> Conn.resp(200, ~s<{"message": "ok"}>)
       end)
 
       response = Tesla.post(url, body, [], config_overrides)
+
+      assert_pluggy(%{body_params: ^body})
 
       assert {:ok,
               %Response{
@@ -39,12 +39,11 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "POST", url, fn conn ->
-        assert conn.query_params == %{"sandbox" => "true", "custom" => "custom-value"}
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       assert {:ok, %Response{}} = Tesla.post(url, %{}, query, config_overrides)
+      assert_pluggy(%{query_params: %{"sandbox" => "true", "custom" => "custom-value"}})
     end
 
     test "sending custom headers", %{bypass: bypass} do
@@ -53,12 +52,14 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "POST", url, fn conn ->
-        assert Enum.any?(headers, fn header -> [header] == headers end) == true
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       assert {:ok, %Response{}} = Tesla.post(url, %{}, [], headers, config_overrides)
+
+      assert_pluggy(fn %{req_headers: req_headers} ->
+        assert Enum.any?(req_headers, fn h -> [h] == headers end)
+      end)
     end
 
     test "send query sandbox as true when sandbox is configured", %{bypass: bypass} do
@@ -66,12 +67,11 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}", sandbox: true)
 
       bypass_expect(bypass, "POST", url, fn conn ->
-        assert conn.query_params == %{"sandbox" => "true"}
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       assert {:ok, %Response{}} = Tesla.post(url, %{}, [], config_overrides)
+      assert_pluggy(%{query_params: %{"sandbox" => "true"}})
     end
 
     test "don't send query sandbox when sandbox is configured to false", %{bypass: bypass} do
@@ -79,12 +79,14 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}", sandbox: false)
 
       bypass_expect(bypass, "POST", url, fn conn ->
-        assert conn.query_params == %{}
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       assert {:ok, %Response{}} = Tesla.post(url, %{}, [], config_overrides)
+
+      assert_pluggy(fn conn ->
+        assert conn.query_params == %{}
+      end)
     end
 
     test "return success even when response status is a client error", %{bypass: bypass} do
@@ -171,12 +173,11 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "GET", url, fn conn ->
-        assert conn.query_params == %{"sandbox" => "true", "custom" => "custom-value"}
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       assert {:ok, %Response{}} = Tesla.get(url, query, config_overrides)
+      assert_pluggy(%{query_params: %{"sandbox" => "true", "custom" => "custom-value"}})
     end
 
     test "sending custom headers", %{bypass: bypass} do
@@ -185,12 +186,14 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "GET", url, fn conn ->
-        assert Enum.any?(headers, fn header -> [header] == headers end) == true
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       assert {:ok, %Response{}} = Tesla.get(url, [], headers, config_overrides)
+
+      assert_pluggy(fn %{req_headers: req_headers} ->
+        assert Enum.any?(req_headers, fn h -> [h] == headers end)
+      end)
     end
 
     test "send query sandbox as true when sandbox is configured", %{bypass: bypass} do
@@ -198,12 +201,12 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}", sandbox: true)
 
       bypass_expect(bypass, "GET", url, fn conn ->
-        assert conn.query_params == %{"sandbox" => "true"}
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       assert {:ok, %Response{}} = Tesla.get(url, config_overrides)
+
+      assert_pluggy(%{query_params: %{"sandbox" => "true"}})
     end
 
     test "don't send query sandbox when sandbox is configured to false", %{bypass: bypass} do
@@ -211,12 +214,14 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}", sandbox: false)
 
       bypass_expect(bypass, "GET", url, fn conn ->
-        assert conn.query_params == %{}
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       assert {:ok, %Response{}} = Tesla.get(url, config_overrides)
+
+      assert_pluggy(fn conn ->
+        assert conn.query_params == %{}
+      end)
     end
 
     test "return success even when response status is a client error", %{bypass: bypass} do
@@ -281,14 +286,14 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "PATCH", url, fn conn ->
-        assert conn.body_params == body
-
         conn
         |> Conn.put_resp_header("custom-header", "custom-value")
         |> Conn.resp(200, ~s<{"message": "ok"}>)
       end)
 
       response = Tesla.patch(url, body, [], config_overrides)
+
+      assert_pluggy(%{body_params: ^body})
 
       assert {:ok,
               %Response{
@@ -308,12 +313,11 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "PATCH", url, fn conn ->
-        assert conn.query_params == %{"sandbox" => "true", "custom" => "custom-value"}
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       assert {:ok, %Response{}} = Tesla.patch(url, %{}, query, config_overrides)
+      assert_pluggy(%{query_params: %{"sandbox" => "true", "custom" => "custom-value"}})
     end
 
     test "sending custom headers", %{bypass: bypass} do
@@ -322,12 +326,14 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}")
 
       bypass_expect(bypass, "PATCH", url, fn conn ->
-        assert Enum.any?(headers, fn header -> [header] == headers end) == true
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       assert {:ok, %Response{}} = Tesla.patch(url, %{}, [], headers, config_overrides)
+
+      assert_pluggy(fn %{req_headers: req_headers} ->
+        assert Enum.any?(req_headers, fn h -> [h] == headers end)
+      end)
     end
 
     test "send query sandbox as true when sandbox is configured", %{bypass: bypass} do
@@ -335,12 +341,12 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}", sandbox: true)
 
       bypass_expect(bypass, "PATCH", url, fn conn ->
-        assert conn.query_params == %{"sandbox" => "true"}
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       assert {:ok, %Response{}} = Tesla.patch(url, %{}, [], config_overrides)
+
+      assert_pluggy(%{query_params: %{"sandbox" => "true"}})
     end
 
     test "don't send query sandbox when sandbox is configured to false", %{bypass: bypass} do
@@ -348,12 +354,14 @@ defmodule PluggyElixir.HttpAdapter.TeslaTest do
       config_overrides = Config.override(host: "http://localhost:#{bypass.port}", sandbox: false)
 
       bypass_expect(bypass, "PATCH", url, fn conn ->
-        assert conn.query_params == %{}
-
         Conn.resp(conn, 200, ~s<{"message": "ok"}>)
       end)
 
       assert {:ok, %Response{}} = Tesla.patch(url, %{}, [], config_overrides)
+
+      assert_pluggy(fn conn ->
+        assert conn.query_params == %{}
+      end)
     end
 
     test "return success even when response status is a client error", %{bypass: bypass} do

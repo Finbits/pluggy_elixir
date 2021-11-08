@@ -4,14 +4,7 @@ defmodule PluggyElixir.Case do
   using do
     quote do
       alias Plug.Conn
-      import PluggyElixir.BypassExpect
-
-      def create_and_save_api_key do
-        auth = %PluggyElixir.Auth{api_key: "generated_api_key_#{:rand.uniform()}"}
-        PluggyElixir.Auth.Guard.set_auth(auth)
-
-        auth.api_key
-      end
+      import PluggyElixir.Test
     end
   end
 
