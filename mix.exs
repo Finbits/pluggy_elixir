@@ -3,7 +3,7 @@ defmodule PluggyElixir.MixProject do
 
   @version "0.0.1"
   @description "A client library for Pluggy.ai API"
-  @links %{"GitHub" => "https://github.com/brainnco/pluggy_elixir"}
+  @links %{"GitHub" => "https://github.com/Finbits/pluggy_elixir"}
 
   def project do
     [

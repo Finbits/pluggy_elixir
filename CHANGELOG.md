@@ -11,4 +11,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Get all webhooks
 
-[unreleased]: https://github.com/brainnco/strong_params/compare/main
+[unreleased]: https://github.com/Finbits/strong_params/compare/main

@@ -1,10 +1,10 @@
 # PluggyElixir
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/brainnco/pluggy_elixir/CI?style=flat-square)](https://github.com/brainnco/pluggy_elixir/actions?query=workflow%3ACI)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/Finbits/pluggy_elixir/CI?style=flat-square)](https://github.com/Finbits/pluggy_elixir/actions?query=workflow%3ACI)
 [![Hex.pm](https://img.shields.io/hexpm/v/pluggy_elixir?style=flat-square)](https://hex.pm/packages/pluggy_elixir)
 [![Hex.pm](https://img.shields.io/hexpm/l/pluggy_elixir?style=flat-square)](https://hex.pm/packages/pluggy_elixir)
 [![Hex.pm](https://img.shields.io/hexpm/dt/pluggy_elixir?style=flat-square)](https://hex.pm/packages/pluggy_elixir)
-[![codecov](https://img.shields.io/codecov/c/github/brainnco/pluggy_elixir?style=flat-square)](https://codecov.io/gh/brainnco/pluggy_elixir)
+[![codecov](https://img.shields.io/codecov/c/github/Finbits/pluggy_elixir?style=flat-square)](https://codecov.io/gh/Finbits/pluggy_elixir)
 
 Welcome to Pluggy Elixir, an API client written in Elixir to access the Open Finance services provided by [Pluggy](http://pluggy.ai)
 
@@ -208,4 +208,4 @@ For most up-to-date and accurate documentation, please see the [API Spec](https:
 
 ## License
 
-[Apache License, Version 2.0](LICENSE) © [brainn.co](https://github.com/brainnco)
+[Apache License, Version 2.0](LICENSE) © [Finbits](https://github.com/Finbits)
