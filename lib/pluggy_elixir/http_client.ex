@@ -91,5 +91,8 @@ defmodule PluggyElixir.HttpClient do
   defp handle_result({:ok, %Response{} = response}),
     do: {:error, Error.parse(response)}
 
+  defp handle_result({:error, %{message: message, details: details}}),
+    do: {:error, %Error{code: 500, message: message, details: details}}
+
   defp handle_result({:error, _reason} = error), do: error
 end

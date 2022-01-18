@@ -77,7 +77,10 @@ defmodule PluggyElixir.MixProject do
           PluggyElixir.HttpAdapter.Tesla
         ],
         Errors: [
-          ~r/PluggyElixir\.Error\..*/
+          PluggyElixir.HttpClient.Error
+        ],
+        Test: [
+          PluggyElixir.Test
         ]
       ]
     ]
